@@ -7,23 +7,55 @@
 
 import UIKit
 
-class ResultViewController: UIViewController {
-
+final class ResultViewController: UIViewController {
+    
+    @IBOutlet weak var labelDescription: UILabel!
+    @IBOutlet weak var labelResult: UILabel!
+    @IBOutlet weak var labelPreviousAnswers: UILabel!
+    
+    var answersChosen: [Answer]!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        self.navigationItem.hidesBackButton = true
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        getResults()
+        labelPreviousAnswers.text = returnPreviousAnswers()
+        
         // Do any additional setup after loading the view.
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    @IBAction func buttonDonePressed() {
+        dismiss(animated: true)
     }
-    */
+    
+}
 
+private extension ResultViewController {
+    func returnPreviousAnswers() -> String {
+        var stroke = "Previous answers:\n"
+        var index = 1
+        for answer in answersChosen {
+            stroke.append("\n\(index). \(answer.title) - \(answer.animal.rawValue)")
+            index += 1
+        }
+        return stroke
+    }
+    
+    func getResults() {
+        var results = [Animal: Int]()
+        for answer in answersChosen {
+            if let currentCount = results[answer.animal] {
+                results[answer.animal] = currentCount + 1
+            } else {
+                results[answer.animal] = 1
+            }
+        }
+        guard let maxResult = results.max(by: { $0.value < $1.value }) else { return }
+        
+        
+        labelResult.text = "You're \(maxResult.key.rawValue)"
+        labelDescription.text = "\(maxResult.key.definition)"
+    }
 }
